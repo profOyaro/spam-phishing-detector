@@ -20,3 +20,6 @@ eli5>=0.13
 transformers>=4.39
 torch>=2.2
 pytest>=8.0
+streamlit
+plotly
+streamlit-option-menu
