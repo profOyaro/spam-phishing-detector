@@ -1,0 +1,6 @@
+From: Security Team <security@example.edu>
+Subject: Monthly security newsletter
+Authentication-Results: mx.example; spf=pass; dkim=pass; dmarc=pass
+
+This month we cover password managers, MFA, and how to report suspicious messages.
+No action is required.

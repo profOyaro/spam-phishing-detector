@@ -1,0 +1,8 @@
+From: Microsoft Support <security-alert@gmail.com>
+Reply-To: attacker@evil.example
+Subject: Urgent invoice action required
+Authentication-Results: mx.example; spf=fail smtp.mailfrom=evil.example; dkim=fail; dmarc=fail
+
+Your Microsoft 365 account will be suspended today.
+Open http://microsoft.office365.verify-user.click/login and verify your password immediately.
+Invoice.zip contains your pending document.
