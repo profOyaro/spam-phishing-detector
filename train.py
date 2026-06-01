@@ -1,49 +1,36 @@
-"""Train classical ML classifiers for spam and phishing detection."""
-from pathlib import Path
-import joblib
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+"""Train TF-IDF + LogisticRegression / RandomForest classical model."""
+import os, joblib, pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
+from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import FeatureUnion
+from sklearn.metrics import classification_report
 
-DATA_PATH = Path("data/sample_emails.csv")
-MODEL_DIR = Path("models")
-
+DATA = [
+    ("Win a FREE iPhone now!!! Click http://bit.ly/x", 1),
+    ("Urgent: verify your bank account http://192.168.0.1/login", 1),
+    ("Your package is delayed, confirm at http://paypa1.com", 1),
+    ("Meeting moved to 3pm tomorrow", 0),
+    ("Lunch next week?", 0),
+    ("Quarterly report attached", 0),
+    ("Your invoice from Acme Corp", 0),
+    ("Reset your password at http://secure-paypal.support", 1),
+    ("Project status update for sprint 7", 0),
+    ("CONGRATULATIONS you won a lottery 1,000,000 USD", 1),
+] * 40
 
 def main():
-    MODEL_DIR.mkdir(exist_ok=True)
-    df = pd.read_csv(DATA_PATH)
-    X_train, X_test, y_train, y_test = train_test_split(
-        df["text"], df["label"], test_size=0.25, random_state=42, stratify=df["label"]
-    )
-    vectorizer = TfidfVectorizer(
-        lowercase=True,
-        strip_accents="unicode",
-        stop_words="english",
-        ngram_range=(1, 2),
-        max_features=12000,
-    )
-    X_train_vec = vectorizer.fit_transform(X_train)
-    X_test_vec = vectorizer.transform(X_test)
-
-    logistic = LogisticRegression(max_iter=1500, class_weight="balanced")
-    logistic.fit(X_train_vec, y_train)
-    print("Logistic Regression")
-    print(classification_report(y_test, logistic.predict(X_test_vec)))
-
-    forest = RandomForestClassifier(n_estimators=160, random_state=42, class_weight="balanced")
-    forest.fit(X_train_vec, y_train)
-    print("Random Forest")
-    print(classification_report(y_test, forest.predict(X_test_vec)))
-
-    joblib.dump(vectorizer, MODEL_DIR / "tfidf_vectorizer.joblib")
-    joblib.dump(logistic, MODEL_DIR / "spam_classifier.joblib")
-    joblib.dump(forest, MODEL_DIR / "random_forest_classifier.joblib")
-    print("Models saved in models/")
-
+    df = pd.DataFrame(DATA, columns=["text", "label"])
+    Xtr, Xte, ytr, yte = train_test_split(df.text, df.label, test_size=0.2, random_state=42)
+    pipe = Pipeline([
+        ("tfidf", TfidfVectorizer(ngram_range=(1,2), min_df=1)),
+        ("clf", LogisticRegression(max_iter=1000)),
+    ])
+    pipe.fit(Xtr, ytr)
+    print(classification_report(yte, pipe.predict(Xte)))
+    os.makedirs("data", exist_ok=True)
+    joblib.dump(pipe, "data/model.joblib")
+    print("Saved data/model.joblib")
 
 if __name__ == "__main__":
     main()

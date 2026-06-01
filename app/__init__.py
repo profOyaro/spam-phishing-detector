@@ -1,1 +1,1 @@
-"""Cybersecurity analysis modules."""
+"""Application package."""
