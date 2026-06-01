@@ -1,6 +1,6 @@
 """Authentication, registration and OTP verification (dev mode)."""
 import random, re, streamlit as st
-from passlib.hash import bcrypt
+from passlib.hash import pbkdf2_sha256
 from . import db
 
 PASSWORD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
@@ -18,7 +18,7 @@ def login_or_register():
             with db.cursor() as cur:
                 cur.execute("SELECT * FROM users WHERE email=?", (email.lower().strip(),))
                 row = cur.fetchone()
-            if row and bcrypt.verify(password, row["password_hash"]):
+            if row and pbkdf2_sha256.verify(password, row["password_hash"]):
                 if not (row["email_verified"] and row["phone_verified"]):
                     st.error("Account not fully verified.")
                 else:
@@ -40,7 +40,7 @@ def login_or_register():
                 with db.cursor() as cur:
                     cur.execute(
                         "INSERT INTO users(email,phone,password_hash) VALUES(?,?,?)",
-                        (email.lower().strip(), phone.strip(), bcrypt.hash(pw)),
+                        (email.lower().strip(), phone.strip(), pbkdf2_sha256.hash(pw)),
                     )
                 st.session_state.pending_email = email.lower().strip()
                 st.session_state.email_otp = _otp()

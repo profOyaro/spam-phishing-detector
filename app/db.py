@@ -1,7 +1,7 @@
 """SQLite persistence layer."""
 import os, sqlite3
 from contextlib import contextmanager
-from passlib.hash import bcrypt
+from passlib.hash import pbkdf2_sha256
 
 DB_PATH = os.path.join("data", "app.db")
 
@@ -58,5 +58,5 @@ def init_db():
         if not cur.fetchone():
             cur.execute(
                 "INSERT INTO users(email,phone,password_hash,email_verified,phone_verified,is_admin) VALUES(?,?,?,1,1,1)",
-                ("admin@system.local", "+10000000000", bcrypt.hash("Admin@123")),
+                ("admin@system.local", "+10000000000", pbkdf2_sha256.hash("Admin@123")),
             )
